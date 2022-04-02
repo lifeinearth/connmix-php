@@ -1,0 +1,27 @@
+{
+  "name": "connmix/connmix",
+  "description": "PHP Client for CONNMIX",
+  "type": "library",
+  "keywords": [
+    "mix",
+    "connmix"
+  ],
+  "homepage": "https://connmix.com",
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "liu,jian",
+      "email": "coder.keda@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.4",
+    "phpunit/phpunit": "^9.5",
+    "ratchet/pawl": "^0.4.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "Connmix\\": "src/"
+    }
+  }
+}
