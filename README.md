@@ -28,7 +28,7 @@ $client = \Connmix\ClientBuilder::create()
 $onFulfilled = function (\Connmix\Context $ctx) {
     $message = $ctx->message();
     switch ($message->type()) {
-        case "pop":
+        case "consume":
             $clientID = $message->clientID();
             $data = $message->data();
             // do something
@@ -71,7 +71,7 @@ end
 $onFulfilled = function (\Connmix\Context $ctx) {
     $message = $ctx->message();
     switch ($message->type()) {
-        case "event":
+        case "consume":
             $clientID = $message->clientID();
             $data = $message->data();
             $op = $data['frame']['data']['op'] ?? '';
@@ -80,7 +80,7 @@ $onFulfilled = function (\Connmix\Context $ctx) {
                 // 通过 $args 到数据库查询用户权限
                 // ...
                 
-                $ctx->connCall($clientID, 'set_context_value', ['user_id', 1000]);
+                $ctx->setContextValue($clientID, 'user_id', 1000);
             }
             break;
     }
@@ -90,6 +90,65 @@ $onFulfilled = function (\Connmix\Context $ctx) {
 ## 订阅频道
 
 通过给某个连接订阅频道，我们可以给这些连接分组，比如：我有手机、电脑的2个连接，在通过授权验证后，我们可以都订阅 `user_10001` 频道，这样我们给该频道发送消息时就可以达到多个设备都可以收到消息的效果。
+
+```php
+$onFulfilled = function (\Connmix\Context $ctx) {
+    $message = $ctx->message();
+    switch ($message->type()) {
+        case "consume":
+            $clientID = $message->clientID();
+            $ctx->subscribe($clientID, "user_10001");
+            break;
+    }
+};
+```
+
+## 推送频道
+
+网格推送会在服务网格内自动寻址，可以在任何节点发起。
+
+- 接收消息的时候被动推送
+
+```php
+$onFulfilled = function (\Connmix\Context $ctx) {
+    $message = $ctx->message();
+    switch ($message->type()) {
+        case "consume":
+            $ctx->meshPublish("user_10001", '{"broadcast":"ok"}');
+            break;
+    }
+};
+```
+
+- 主动推送
+
+```php
+$client->meshPublish("user_10001", '{"broadcast":"ok"}');
+```
+
+## 发送到客户端
+
+网格发送会在服务网格内自动寻址，可以在任何节点发起。
+
+- 接收消息的时候被动发送
+
+```php
+$onFulfilled = function (\Connmix\Context $ctx) {
+    $message = $ctx->message();
+    switch ($message->type()) {
+        case "consume":
+            $clientID = $message->clientID();
+            $ctx->meshSend($clientID, '{"result":"ok"}');
+            break;
+    }
+};
+```
+
+- 主动发送
+
+```php
+$client->meshSend($clientID, '{"result":"ok"}');
+```
 
 ## License
 
