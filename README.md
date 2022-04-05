@@ -57,9 +57,7 @@ $client->consume('foo')->then($onFulfilled, $onRejected);
 
 我们可以给每个连接设置上下文，在整个连接内有效，通过这个功能我们可以实现用户鉴权登录。
 
-- 首先我们在 lua 协议 `on_message` 方法中增加以下代码
-
-只有在接收到的消息为 `userauth` 才会触发，这会让该连接的消息处理暂停，直到 `user_id`被设置值后才会继续执行。
+- 首先我们在 lua 协议 `on_message` 方法中增加以下代码，只有在接收到的消息为 `userauth` 才会触发，`wait_context_value` 会使该连接的消息处理暂停，直到 `user_id`被设置值后才会继续执行。
 
 ```lua
 if data["op"] == "userauth" then
@@ -67,7 +65,7 @@ if data["op"] == "userauth" then
 end
 ```
 
-- 通过客户端 `connCall` 方法来远程执行 `set_context_value` 来完成鉴权
+- 通过客户端 `connCall` 方法来远程执行 `set_context_value` 来完成鉴权。
 
 ```php
 $onFulfilled = function (\Connmix\Context $ctx) {
@@ -77,8 +75,9 @@ $onFulfilled = function (\Connmix\Context $ctx) {
             $clientID = $message->clientID();
             $data = $message->data();
             $op = $data['frame']['data']['op'] ?? '';
+            $args = $data['frame']['data']['args'] ?? [];
             if ($op == 'userauth') {
-                // 数据库查询用户权限
+                // 通过 $args 到数据库查询用户权限
                 // ...
                 
                 $ctx->connCall($clientID, 'set_context_value', ['user_id', 1000]);
