@@ -65,7 +65,7 @@ if data["op"] == "userauth" then
 end
 ```
 
-- 通过客户端 `connCall` 方法来远程执行 `set_context_value` 来完成鉴权。
+- 通过客户端执行 `set_context_value` 来完成鉴权。
 
 ```php
 $onFulfilled = function (\Connmix\Context $ctx) {
