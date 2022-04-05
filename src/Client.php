@@ -34,9 +34,9 @@ class Client
     protected $timeout = 10.0;
 
     /**
-     * @var EngineV1[]
+     * @var Consumer[]
      */
-    protected $engines = [];
+    protected $consumers = [];
 
     /**
      * @param array $config
@@ -74,7 +74,7 @@ class Client
      */
     protected function loadNodes(): void
     {
-        $url = sprintf("%s/$%s/nodes", $this->host, $this->version);
+        $url = sprintf("%s/%s/nodes", $this->host, $this->version);
         $response = $this->guzzle->request('GET', $url);
         $body = static::parseBody($response);
         $this->nodes = $body['nodes'];
@@ -91,28 +91,14 @@ class Client
     }
 
     /**
-     * @param callable $onFulfilled
-     * @param callable $onRejected
-     * @param string ...$topics
-     * @return void
-     * @throws \Exception
+     * @param string ...$queues
+     * @return Consumer
      */
-    public function consume(callable $onFulfilled, callable $onRejected, string ...$topics): void
+    public function consume(string ...$queues): Consumer
     {
-        if (!empty($this->engines)) {
-            throw new \Exception('Unable to repeat consuming while already consuming');
-        }
-
-        foreach ($this->nodes as $node) {
-            $host = sprintf("%s:%d", $node['ip'], $node['port']);
-            switch ($this->version) {
-                case '/v1':
-                    $this->engines[] = new EngineV1($onFulfilled, $onRejected, $topics, $host, $this->timeout);
-                    break;
-                default:
-                    throw new \Exception('Invalid API version');
-            }
-        }
+        $consumer = new Consumer($this->nodes, $this->version, $this->timeout, $queues);
+        $this->consumers[] = $consumer;
+        return $consumer;
     }
 
     /**
@@ -120,8 +106,8 @@ class Client
      */
     public function close(): void
     {
-        foreach ($this->engines as $engine) {
-            $engine->close();
+        foreach ($this->consumers as $consumer) {
+            $consumer->close();
         }
 
         $loop = \React\EventLoop\Loop::get();

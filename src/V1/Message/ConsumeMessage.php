@@ -30,7 +30,7 @@ class ConsumeMessage
      */
     public function getContents(): string
     {
-        return sprintf($this->format, implode($this->topics, '","'), AutoIncrement::id());
+        return sprintf($this->format, implode('","', $this->topics), AutoIncrement::id());
     }
 
 }

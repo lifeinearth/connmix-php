@@ -3,7 +3,6 @@
 namespace Connmix;
 
 use Ratchet\Client\WebSocket;
-use Ratchet\RFC6455\Messaging\MessageInterface as RatchetMessageInterface;
 
 class Context
 {
@@ -25,10 +24,10 @@ class Context
 
     /**
      * @param WebSocket $conn
-     * @param RatchetMessageInterface $message
+     * @param MessageInterface $message
      * @param EncoderInterface $encoder
      */
-    public function __construct(WebSocket $conn, RatchetMessageInterface $message, EncoderInterface $encoder)
+    public function __construct(WebSocket $conn, MessageInterface $message, EncoderInterface $encoder)
     {
         $this->conn = $conn;
         $this->message = $message;

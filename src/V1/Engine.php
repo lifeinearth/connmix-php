@@ -65,7 +65,8 @@ class Engine
             'timeout' => $this->timeout,
         ]);
         $connector = new \Ratchet\Client\Connector($loop, $reactConnector);
-        $connector(sprintf('ws://%s/ws/v1', $this->host), [], [])
+        $url = sprintf('ws://%s/ws/v1', $this->host);
+        $connector($url, [], [])
             ->then(function (\Ratchet\Client\WebSocket $conn) {
                 $this->conn = $conn;
                 $onFulfilled = $this->onFulfilled;
@@ -76,7 +77,7 @@ class Engine
                         $receiveMessage = new Message($msg);
                         $encoder = new Encoder();
                         $onFulfilled(new Context($conn, $receiveMessage, $encoder));
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         $onRejected($e);
                     }
                 });
@@ -86,8 +87,12 @@ class Engine
                     $this->run();
                 });
 
-                $conn->send($this->message->getContents());
-            }, function (\Exception $e) {
+                try {
+                    $conn->send($this->message->getContents());
+                } catch (\Throwable $e) {
+                    $onRejected($e);
+                }
+            }, function (\Throwable $e) {
                 $onRejected = $this->onRejected;
                 $onRejected($e);
                 $this->run();

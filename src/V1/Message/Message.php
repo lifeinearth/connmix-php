@@ -26,7 +26,7 @@ class Message implements MessageInterface
     public function __construct(RatchetMessageInterface $message)
     {
         $this->raw = $message;
-        $this->storage = json_decode($message->getContents(), true) ?: [];
+        $this->storage = json_decode($message->getPayload(), true) ?: [];
     }
 
     /**
