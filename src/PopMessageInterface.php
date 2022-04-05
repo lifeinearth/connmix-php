@@ -17,6 +17,6 @@ interface PopMessageInterface
 
     public function data(): array;
 
-    public function id(): int;
+    public function id(): ?int;
 
 }

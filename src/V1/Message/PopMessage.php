@@ -14,18 +14,24 @@ class PopMessage implements PopMessageInterface
     protected $message;
 
     /**
+     * @var array
+     */
+    protected $storage;
+
+    /**
      * @param MessageInterface $message
      */
     public function __construct(MessageInterface $message)
     {
         $this->message = $message;
+        $this->storage = json_decode($message->getContents(), true) ?: [];
     }
 
     /**
      * @param string $message
      * @return bool
      */
-    public function check(string $message): bool
+    public static function check(string $message): bool
     {
         return strpos($message, '{"method":"queue.pop","params":') === 0;
     }
@@ -40,27 +46,27 @@ class PopMessage implements PopMessageInterface
 
     public function method(): string
     {
-        // TODO: Implement method() method.
+        return $this->storage['method'] ?? '';
     }
 
     public function clientId(): int
     {
-        // TODO: Implement clientId() method.
+        return $this->storage['params']['client_id'] ?? 0;
     }
 
     public function queue(): string
     {
-        // TODO: Implement queue() method.
+        return $this->storage['params']['queue'] ?? '';
     }
 
     public function data(): array
     {
-        // TODO: Implement data() method.
+        return $this->storage['params']['data'] ?? [];
     }
 
-    public function id(): int
+    public function id(): ?int
     {
-        // TODO: Implement id() method.
+        return $this->storage['id'] ?? null;
     }
 
 }

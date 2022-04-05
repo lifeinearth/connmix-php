@@ -70,7 +70,7 @@ class Context
     /**
      * @return int
      */
-    public function id(): int
+    public function id(): ?int
     {
         return $this->message->id();
     }

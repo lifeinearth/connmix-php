@@ -123,6 +123,9 @@ class Client
         foreach ($this->engines as $engine) {
             $engine->close();
         }
+
+        $loop = \React\EventLoop\Loop::get();
+        $loop->stop();
     }
 
 }

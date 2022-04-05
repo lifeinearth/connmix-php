@@ -74,10 +74,10 @@ class Engine
 
                 $conn->on('message', function (\Ratchet\RFC6455\Messaging\MessageInterface $msg) use ($conn, $onFulfilled, $onRejected) {
                     try {
-                        $popMessage = new PopMessage($msg);
-                        if ($popMessage->check($msg)) {
+                        if (PopMessage::check($msg)) {
                             return;
                         }
+                        $popMessage = new PopMessage($msg);
                         $encoder = new Encoder();
                         $onFulfilled(new Context($conn, $popMessage, $encoder));
                     } catch (\Exception $e) {
