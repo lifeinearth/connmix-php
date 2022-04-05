@@ -3,9 +3,8 @@
 namespace Connmix\V1;
 
 use Connmix\Context;
-use Connmix\PopMessageInterface;
 use Connmix\V1\Message\ConsumeMessage;
-use Connmix\V1\Message\PopMessage;
+use Connmix\V1\Message\Message;
 
 class Engine
 {
@@ -74,12 +73,9 @@ class Engine
 
                 $conn->on('message', function (\Ratchet\RFC6455\Messaging\MessageInterface $msg) use ($conn, $onFulfilled, $onRejected) {
                     try {
-                        if (PopMessage::check($msg)) {
-                            return;
-                        }
-                        $popMessage = new PopMessage($msg);
+                        $receiveMessage = new Message($msg);
                         $encoder = new Encoder();
-                        $onFulfilled(new Context($conn, $popMessage, $encoder));
+                        $onFulfilled(new Context($conn, $receiveMessage, $encoder));
                     } catch (\Exception $e) {
                         $onRejected($e);
                     }

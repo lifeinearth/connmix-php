@@ -3,7 +3,7 @@
 namespace Connmix;
 
 use Ratchet\Client\WebSocket;
-use Ratchet\RFC6455\Messaging\MessageInterface;
+use Ratchet\RFC6455\Messaging\MessageInterface as RatchetMessageInterface;
 
 class Context
 {
@@ -14,7 +14,7 @@ class Context
     protected $conn;
 
     /**
-     * @var PopMessageInterface
+     * @var MessageInterface
      */
     protected $message;
 
@@ -25,10 +25,10 @@ class Context
 
     /**
      * @param WebSocket $conn
-     * @param PopMessageInterface $message
+     * @param RatchetMessageInterface $message
      * @param EncoderInterface $encoder
      */
-    public function __construct(WebSocket $conn, PopMessageInterface $message, EncoderInterface $encoder)
+    public function __construct(WebSocket $conn, RatchetMessageInterface $message, EncoderInterface $encoder)
     {
         $this->conn = $conn;
         $this->message = $message;
@@ -36,95 +36,89 @@ class Context
     }
 
     /**
-     * @return string
-     */
-    public function method(): string
-    {
-        return $this->message->method();
-    }
-
-    /**
-     * @return int
-     */
-    public function clientId(): int
-    {
-        return $this->message->clientId();
-    }
-
-    /**
-     * @return string
-     */
-    public function queue(): string
-    {
-        return $this->message->queue();
-    }
-
-    /**
-     * @return array
-     */
-    public function data(): array
-    {
-        return $this->message->data();
-    }
-
-    /**
-     * @return int
-     */
-    public function id(): ?int
-    {
-        return $this->message->id();
-    }
-
-    /**
      * @return MessageInterface
      */
     public function message(): MessageInterface
     {
-        return $this->message->rawMessage();
+        return $this->message;
     }
 
-    public function send(string $method, array $params = []): array
+    /**
+     * @param string $method
+     * @param array $params
+     * @return void
+     */
+    public function send(string $method, array $params = []): int
     {
+        $id = AutoIncrement::id();
         $message = $this->encoder->encode([
             'method' => $method,
             'params' => $params,
             'id' => AutoIncrement::id(),
         ]);
         $this->conn->send($message);
+        return $id;
     }
 
-    public function connCall(int $clientId, string $method, array $params): array
+    /**
+     * @param int $clientId
+     * @param string $method
+     * @param array $params
+     * @return int
+     */
+    public function connCall(int $clientId, string $method, array $params): int
     {
-        $this->send('conn.call', [
+        return $this->send('conn.call', [
             'client_id' => $clientId,
             'method' => $method,
             'params' => $params,
         ]);
     }
 
-    public function setContextValue(int $clientId, string $key, $value): array
+    /**
+     * @param int $clientId
+     * @param string $key
+     * @param $value
+     * @return int
+     */
+    public function setContextValue(int $clientId, string $key, $value): int
     {
         return $this->connCall($clientId, 'set_context_value', [
             $key => $value,
         ]);
     }
 
-    public function subscribe(int $clientId, string ...$channels): array
+    /**
+     * @param int $clientId
+     * @param string ...$channels
+     * @return int
+     */
+    public function subscribe(int $clientId, string ...$channels): int
     {
         return $this->connCall($clientId, 'subscribe', $channels);
     }
 
-    public function meshSend(int $clientId, string $data): array
+    /**
+     * @param int $clientId
+     * @param string $data
+     * @return int
+     */
+    public function meshSend(int $clientId, string $data): int
     {
-        $this->send('mesh.send', [
+        return $this->send('mesh.send', [
             'client_id' => $clientId,
             'data' => $data,
         ]);
     }
 
-    public function meshPublish(string $channel, string $data): array
+    /**
+     * @param string $channel
+     * @param string $data
+     * @return int
+     */
+    public function meshPublish(string $channel, string $data): int
     {
-        $this->send('mesh.send', [
+        return $this->send('mesh.send', [
             'channel' => $channel,
             'data' => $data,
         ]);
