@@ -14,6 +14,7 @@ composer require connmix/connmix
 
 该客户端为异步模式，如果配合使用异步数据库组件将获得更高性能。
 
+- `consume('foo')` 消费内存队列，可以同时消费多个；队列中的数据是由 entry.lua 的 `mix.queue.push()` 方法推入。
 - `$onFulfilled` 闭包内处理业务逻辑。
 - `$onRejected` 闭包内处理网络异常。
 - 可以在 `Laravel`、`ThinkPHP` 等任意框架中使用。
