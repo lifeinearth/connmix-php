@@ -11,7 +11,7 @@ $onFulfilled = function (\Connmix\Context $ctx) {
         case "pop":
             $clientID = $message->clientID();
             $data = $message->data();
-            $ctx->meshSend($clientID, sprintf("%s, me too", $data['frame']['data'] ?? ''));
+            $ctx->meshSend($clientID, sprintf("received: %s", $data['frame']['data'] ?? ''));
             break;
         case "result":
             $success = $message->success();
@@ -20,7 +20,6 @@ $onFulfilled = function (\Connmix\Context $ctx) {
             break;
         case "error":
             $error = $message->error();
-            var_dump($error);
             break;
         case "unknown":
             $payload = $message->rawMessage()->getPayload();
@@ -29,6 +28,5 @@ $onFulfilled = function (\Connmix\Context $ctx) {
 };
 $onRejected = function (\Exception $e) {
     // handle error
-    var_dump($e->getMessage());
 };
 $client->consume('foo')->then($onFulfilled, $onRejected);
