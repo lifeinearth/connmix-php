@@ -23,4 +23,16 @@ interface MessageInterface
 
     public function firstResult(): ResultInterface;
 
+    public function clientID(): int;
+
+    public function queue(): string;
+
+    public function data(): ?array;
+
+    public function success(): bool;
+
+    public function fail(): int;
+
+    public function total(): int;
+
 }

@@ -15,7 +15,7 @@ class Param implements ParamInterface
     /**
      * @param array $item
      */
-    public function __construct(array $item)
+    public function __construct(array $item = [])
     {
         $this->item = $item;
     }

@@ -15,7 +15,7 @@ class Result implements ResultInterface
     /**
      * @param array $item
      */
-    public function __construct(array $item)
+    public function __construct(array $item = [])
     {
         $this->iterm = $item;
     }
