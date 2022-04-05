@@ -20,6 +20,14 @@ class Result implements ResultInterface
         $this->iterm = $item;
     }
 
+    /**
+     * @return array|null
+     */
+    public function error(): ?array
+    {
+        return $this->iterm['error'] ?? null;
+    }
+
     public function success(): bool
     {
         return $this->iterm['success'] ?? false;

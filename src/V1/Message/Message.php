@@ -70,7 +70,11 @@ class Message implements MessageInterface
      */
     public function error(): ?array
     {
-        return $this->storage['error'] ?? null;
+        $error = $this->storage['error'] ?? null;
+        if ($error) {
+            return $error;
+        }
+        return $this->firstResult()->error();
     }
 
     /**

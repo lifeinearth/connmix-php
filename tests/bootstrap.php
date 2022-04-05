@@ -20,6 +20,7 @@ $onFulfilled = function (\Connmix\Context $ctx) {
             break;
         case "error":
             $error = $message->error();
+            var_dump($error);
             break;
         case "unknown":
             $payload = $message->rawMessage()->getPayload();

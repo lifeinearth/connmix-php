@@ -67,7 +67,7 @@ class Engine
         $connector = new \Ratchet\Client\Connector($loop, $reactConnector);
         $url = sprintf('ws://%s/ws/v1', $this->host);
         $connector($url, [], [])
-            ->then(function (\Ratchet\Client\WebSocket $conn) {
+            ->then(function (\Ratchet\Client\WebSocket $conn) use ($url) {
                 $this->conn = $conn;
                 $onFulfilled = $this->onFulfilled;
                 $onRejected = $this->onRejected;
@@ -82,9 +82,9 @@ class Engine
                     }
                 });
 
-                $conn->on('close', function ($code = null, $reason = null) use ($onRejected) {
-                    $onRejected(new \Exception(sprintf('WebSocket connection closed (code=%d, reason=%s)', $code, $reason)));
-                    $this->run();
+                $conn->on('close', function ($code = null, $reason = null) use ($onRejected, $url) {
+                    $onRejected(new \Exception(sprintf('Client connection closed (code=%d, reason=%s, url=%s)', $code, $reason, $url)));
+                    \React\EventLoop\Loop::addTimer(1, [$this, 'run']);
                 });
 
                 try {
@@ -92,10 +92,10 @@ class Engine
                 } catch (\Throwable $e) {
                     $onRejected($e);
                 }
-            }, function (\Throwable $e) {
+            }, function (\Throwable $e) use ($loop) {
                 $onRejected = $this->onRejected;
                 $onRejected($e);
-                $this->run();
+                \React\EventLoop\Loop::addTimer(1, [$this, 'run']);
             });
     }
 
