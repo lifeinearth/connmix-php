@@ -14,24 +14,14 @@ class Client
     protected $host = '';
 
     /**
-     * @var string
-     */
-    protected $version = '';
-
-    /**
-     * @var array
-     */
-    protected $nodes = [];
-
-    /**
-     * @var \GuzzleHttp\Client
-     */
-    protected $guzzle;
-
-    /**
      * @var float
      */
     protected $timeout = 10.0;
+
+    /**
+     * @var Nodes
+     */
+    protected $nodes;
 
     /**
      * @var Consumer[]
@@ -47,48 +37,9 @@ class Client
             $this->$key = $value;
         }
 
-        $this->guzzle = new \GuzzleHttp\Client([
-            'timeout' => $this->timeout,
-        ]);
-
-        $this->loadVersion();
-        $this->loadNodes();
+        $this->nodes = new Nodes($this->host, $this->timeout);
     }
 
-    /**
-     * @return void
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    protected function loadVersion(): void
-    {
-        $url = sprintf("%s/version", $this->host);
-        $response = $this->guzzle->request('GET', $url);
-        $body = static::parseBody($response);
-        $api = $body['api'];
-        $this->version = array_shift($api);
-    }
-
-    /**
-     * @return void
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    protected function loadNodes(): void
-    {
-        $url = sprintf("%s/%s/nodes", $this->host, $this->version);
-        $response = $this->guzzle->request('GET', $url);
-        $body = static::parseBody($response);
-        $this->nodes = $body['nodes'];
-    }
-
-    /**
-     * @param ResponseInterface $response
-     * @return array
-     */
-    protected static function parseBody(ResponseInterface $response): array
-    {
-        $body = $response->getBody()->__toString();
-        return json_decode($body, true);
-    }
 
     /**
      * @param string ...$queues
@@ -96,7 +47,7 @@ class Client
      */
     public function consume(string ...$queues): Consumer
     {
-        $consumer = new Consumer($this->nodes, $this->version, $this->timeout, $queues);
+        $consumer = new Consumer($this->nodes, $this->timeout, $queues);
         $this->consumers[] = $consumer;
         return $consumer;
     }

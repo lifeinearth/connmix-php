@@ -8,14 +8,14 @@ class Consumer
 {
 
     /**
-     * @var array
+     * @var Nodes
      */
-    protected $nodes = [];
+    protected $nodes;
 
     /**
-     * @var string
+     * @var float
      */
-    protected $version = '';
+    protected $timeout = 0.0;
 
     /**
      * @var array
@@ -23,25 +23,18 @@ class Consumer
     protected $queues = [];
 
     /**
-     * @var float
-     */
-    protected $timeout = 10.0;
-
-    /**
      * @var EngineV1[]
      */
     protected $engines = [];
 
     /**
-     * @param array $nodes
-     * @param string $version
+     * @param Nodes $nodes
      * @param float $timeout
      * @param array $queues
      */
-    public function __construct(array &$nodes, string $version, float $timeout, array $queues)
+    public function __construct(Nodes $nodes, float $timeout, array $queues)
     {
-        $this->nodes = &$nodes;
-        $this->version = $version;
+        $this->nodes = $nodes;
         $this->timeout = $timeout;
         $this->queues = $queues;
     }
@@ -54,9 +47,9 @@ class Consumer
      */
     public function then(callable $onFulfilled, callable $onRejected): void
     {
-        foreach ($this->nodes as $node) {
+        foreach ($this->nodes->items() as $node) {
             $host = sprintf("%s:%d", $node['ip'], $node['port']);
-            switch ($this->version) {
+            switch ($this->nodes->version()) {
                 case 'v1':
                     $engine = new EngineV1($onFulfilled, $onRejected, $this->queues, $host, $this->timeout);
                     $engine->run();
