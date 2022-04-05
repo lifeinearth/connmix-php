@@ -1,6 +1,6 @@
-## CONNMIX PHP client
+# CONNMIX PHP client
 
-通过该客户端，可以使用 PHP 语言来消费 connmix 内存队列内的业务消息，执行对应的业务逻辑。
+通过该客户端，可以使用 PHP 来消费 connmix 内存队列内的用户消息，执行业务逻辑后响应到对应的用户。
 
 ## 快速上手
 
@@ -12,10 +12,12 @@ composer require connmix/connmix
 
 ### 创建客户端
 
-- 该客户端为异步模式
-- `$onFulfilled` 闭包内处理业务逻辑
-- `$onRejected` 闭包内处理网络异常
-- 可以在 `Laravel`、`ThinkPHP` 等任意框架中使用
+该客户端为异步模式
+
+- `$onFulfilled` 闭包内处理业务逻辑。
+- `$onRejected` 闭包内处理网络异常。
+- 可以在 `Laravel`、`ThinkPHP` 等任意框架中使用。
+- 使用 `meshSend`、`meshPublish` 方法给客户端响应数据。
 
 ```php
 $client = \Connmix\ClientBuilder::create()
@@ -48,6 +50,16 @@ $onRejected = function (\Exception $e) {
 };
 $client->consume('foo')->then($onFulfilled, $onRejected);
 ```
+
+## 设置上下文
+
+
+
+## 订阅频道
+
+通过给某个连接订阅频道，我们可以给这些连接分组，比如：我有手机、电脑的2个连接，在通过授权验证后，我们可以都订阅 `user_10001` 频道，这样我们给该频道发送消息时就可以达到两个设备都可以收到消息的效果。
+
+
 
 ## License
 
