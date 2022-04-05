@@ -1,6 +1,6 @@
 # CONNMIX PHP client
 
-通过该客户端，可以使用 PHP 来消费 connmix 内存队列内的用户消息，执行业务逻辑后响应到对应的用户。
+通过该客户端，可以使用 PHP 来消费 connmix 内存队列内的用户消息，执行业务逻辑后响应到对应的用户端。
 
 ## 快速上手
 
@@ -12,12 +12,14 @@ composer require connmix/connmix
 
 ### 创建客户端
 
-该客户端为异步模式
+该客户端为异步模式，如果配合使用异步数据库组件将获得更高性能。
 
 - `$onFulfilled` 闭包内处理业务逻辑。
 - `$onRejected` 闭包内处理网络异常。
 - 可以在 `Laravel`、`ThinkPHP` 等任意框架中使用。
-- 使用 `meshSend`、`meshPublish` 方法给客户端响应数据。
+- 使用 `meshSend()`、`meshPublish()` 方法给客户端响应数据。
+- 无需处理重连，断线后客户端会自动重连。
+- connmix 集群增加节点后客户端无需重启，客户端会自动获取新增的节点，自动移除下线的节点。
 
 ```php
 $client = \Connmix\ClientBuilder::create()
@@ -53,13 +55,42 @@ $client->consume('foo')->then($onFulfilled, $onRejected);
 
 ## 设置上下文
 
+我们可以给每个连接设置上下文，在整个连接内有效，通过这个功能我们可以实现用户鉴权登录。
 
+- 首先我们在 lua 协议 `on_message` 方法中增加以下代码
+
+只有在接收到的消息为 `userauth` 才会触发，这会让该连接的消息处理暂停，直到 `user_id`被设置值后才会继续执行。
+
+```lua
+if data["op"] == "userauth" then
+    conn:wait_context_value("user_id")
+end
+```
+
+- 通过客户端 `connCall` 方法来远程执行 `set_context_value` 来完成鉴权
+
+```php
+$onFulfilled = function (\Connmix\Context $ctx) {
+    $message = $ctx->message();
+    switch ($message->type()) {
+        case "event":
+            $clientID = $message->clientID();
+            $data = $message->data();
+            $op = $data['frame']['data']['op'] ?? '';
+            if ($op == 'userauth') {
+                // 数据库查询用户权限
+                // ...
+                
+                $ctx->connCall($clientID, 'set_context_value', ['user_id', 1000]);
+            }
+            break;
+    }
+};
+```
 
 ## 订阅频道
 
-通过给某个连接订阅频道，我们可以给这些连接分组，比如：我有手机、电脑的2个连接，在通过授权验证后，我们可以都订阅 `user_10001` 频道，这样我们给该频道发送消息时就可以达到两个设备都可以收到消息的效果。
-
-
+通过给某个连接订阅频道，我们可以给这些连接分组，比如：我有手机、电脑的2个连接，在通过授权验证后，我们可以都订阅 `user_10001` 频道，这样我们给该频道发送消息时就可以达到多个设备都可以收到消息的效果。
 
 ## License
 
