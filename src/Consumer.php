@@ -25,7 +25,7 @@ class Consumer
     /**
      * @var EngineV1[]
      */
-    protected $engines = [];
+    public $engines = [];
 
     /**
      * @var callable
@@ -86,18 +86,34 @@ class Consumer
     }
 
     /**
+     * @param string $version
+     * @param string $host
+     * @param float $timeout
+     * @return EngineV1
+     * @throws \Exception
+     */
+    public static function newEngine(string $version, string $host, float $timeout): EngineV1
+    {
+        switch ($version) {
+            case 'v1':
+                $engine = new EngineV1(function () {
+                }, function () {
+                }, [], $host, $timeout);
+                $engine->run();
+                break;
+            default:
+                throw new \Exception('Invalid API version');
+        }
+        return $engine;
+    }
+
+    /**
      * @return void
      * @throws \Exception
      */
     protected function syncFunc(): \Closure
     {
         return function () {
-            try {
-                $this->nodes->loadNodes();
-            } catch (\Throwable $ex) {
-                echo sprintf("ERROR: load nodes fail: %s\n", $ex->getMessage());
-            }
-
             // 增加
             foreach ($this->nodes->items() as $node) {
                 $host = sprintf("%s:%d", $node['ip'], $node['port']);
@@ -112,6 +128,7 @@ class Consumer
                     $this->addEngine($host);
                 }
             }
+
             // 减少
             foreach ($this->engines as $key => $engine) {
                 $find = false;
@@ -129,7 +146,7 @@ class Consumer
                 }
             }
 
-            \React\EventLoop\Loop::addTimer($this->syncInterval + mt_rand(1, 10), $this->syncFunc());
+            \React\EventLoop\Loop::addTimer($this->syncInterval, $this->syncFunc());
         };
     }
 

@@ -34,6 +34,11 @@ class Nodes
     protected $items = [];
 
     /**
+     * @var int
+     */
+    protected $loadInterval = 60;
+
+    /**
      * @param string $host
      * @param float $timeout
      * @throws \GuzzleHttp\Exception\GuzzleException
@@ -49,6 +54,17 @@ class Nodes
 
         $this->loadVersion();
         $this->loadNodes();
+
+        $func = null;
+        $func = function () use ($func) {
+            try {
+                $this->loadNodes();
+            } catch (\Throwable $ex) {
+                echo sprintf("ERROR: load nodes fail: %s\n", $ex->getMessage());
+            }
+            \React\EventLoop\Loop::addTimer($this->loadInterval + mt_rand(1, 10), $func);
+        };
+        \React\EventLoop\Loop::addTimer($this->loadInterval + mt_rand(1, 10), $func);
     }
 
     /**

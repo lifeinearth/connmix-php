@@ -24,10 +24,10 @@ class Context
 
     /**
      * @param WebSocket $conn
-     * @param MessageInterface $message
+     * @param MessageInterface|null $message
      * @param EncoderInterface $encoder
      */
-    public function __construct(WebSocket $conn, MessageInterface $message, EncoderInterface $encoder)
+    public function __construct(WebSocket $conn, ?MessageInterface $message, EncoderInterface $encoder)
     {
         $this->conn = $conn;
         $this->message = $message;

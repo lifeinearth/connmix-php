@@ -37,22 +37,22 @@ class Engine
     /**
      * @var \Ratchet\Client\WebSocket
      */
-    protected $conn;
+    public $conn;
 
     /**
      * @param callable $onFulfilled
      * @param callable $onRejected
-     * @param array $topics
+     * @param array $queues
      * @param string $host
      * @param float $timeout
      */
-    public function __construct(callable $onFulfilled, callable $onRejected, array $topics, string $host, float $timeout)
+    public function __construct(callable $onFulfilled, callable $onRejected, array $queues, string $host, float $timeout)
     {
         $this->onFulfilled = $onFulfilled;
         $this->onRejected = $onRejected;
         $this->host = $host;
         $this->timeout = $timeout;
-        $this->message = new ConsumeMessage($topics);
+        $this->message = new ConsumeMessage($queues);
     }
 
     /**
@@ -75,8 +75,7 @@ class Engine
                 $conn->on('message', function (\Ratchet\RFC6455\Messaging\MessageInterface $msg) use ($conn, $onFulfilled, $onRejected) {
                     try {
                         $receiveMessage = new Message($msg);
-                        $encoder = new Encoder();
-                        $onFulfilled(new Context($conn, $receiveMessage, $encoder));
+                        $onFulfilled(new Context($conn, $receiveMessage, new Encoder()));
                     } catch (\Throwable $e) {
                         $onRejected($e);
                     }
@@ -88,7 +87,10 @@ class Engine
                 });
 
                 try {
-                    $conn->send($this->message->getContents());
+                    $contents = $this->message->getContents();
+                    if ($contents != '') {
+                        $conn->send($contents);
+                    }
                 } catch (\Throwable $e) {
                     $onRejected($e);
                 }

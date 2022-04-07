@@ -15,14 +15,14 @@ class ConsumeMessage
     /**
      * @var array
      */
-    protected $topics = [];
+    protected $queues = [];
 
     /**
-     * @param array $topics
+     * @param array $queues
      */
-    public function __construct(array $topics)
+    public function __construct(array $queues)
     {
-        $this->topics = $topics;
+        $this->queues = $queues;
     }
 
     /**
@@ -30,7 +30,10 @@ class ConsumeMessage
      */
     public function getContents(): string
     {
-        return sprintf($this->format, implode('","', $this->topics), AutoIncrement::id());
+        if (empty($this->queues)) {
+            return '';
+        }
+        return sprintf($this->format, implode('","', $this->queues), AutoIncrement::id());
     }
 
 }
