@@ -129,7 +129,7 @@ class Consumer
                 }
             }
 
-            \React\EventLoop\Loop::addTimer($this->syncInterval, $this->syncFunc());
+            \React\EventLoop\Loop::addTimer($this->syncInterval + mt_rand(1, 10), $this->syncFunc());
         };
     }
 
