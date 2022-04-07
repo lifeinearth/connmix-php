@@ -22,7 +22,7 @@ class Engine
     /**
      * @var string
      */
-    protected $host = '';
+    public $host = '';
 
     /**
      * @var float

@@ -28,6 +28,16 @@ class Consumer
     protected $engines = [];
 
     /**
+     * @var callable
+     */
+    protected $onFulfilled;
+
+    /**
+     * @var callable
+     */
+    protected $onRejected;
+
+    /**
      * @param Nodes $nodes
      * @param float $timeout
      * @param array $queues
@@ -37,6 +47,7 @@ class Consumer
         $this->nodes = $nodes;
         $this->timeout = $timeout;
         $this->queues = $queues;
+        \React\EventLoop\Loop::addTimer(60, [$this, 'sync']);
     }
 
     /**
@@ -47,18 +58,71 @@ class Consumer
      */
     public function then(callable $onFulfilled, callable $onRejected): void
     {
+        $this->onFulfilled = $onFulfilled;
+        $this->onRejected = $onRejected;
+
         foreach ($this->nodes->items() as $node) {
             $host = sprintf("%s:%d", $node['ip'], $node['port']);
-            switch ($this->nodes->version()) {
-                case 'v1':
-                    $engine = new EngineV1($onFulfilled, $onRejected, $this->queues, $host, $this->timeout);
-                    $engine->run();
-                    $this->engines[] = $engine;
+            $this->addEngine($host);
+        }
+    }
+
+    protected function addEngine(string $host)
+    {
+        switch ($this->nodes->version()) {
+            case 'v1':
+                $engine = new EngineV1($this->onFulfilled, $this->onRejected, $this->queues, $host, $this->timeout);
+                $engine->run();
+                $this->engines[] = $engine;
+                break;
+            default:
+                throw new \Exception('Invalid API version');
+        }
+    }
+
+    /**
+     * @return void
+     * @throws \Exception
+     */
+    protected function sync(): void
+    {
+        try {
+            $this->nodes->loadNodes();
+        } catch (\Throwable $ex) {
+            echo sprintf("ERROR: load nodes fail: %s\n", $ex->getMessage());
+        }
+
+        // 增加
+        foreach ($this->nodes->items() as $node) {
+            $host = sprintf("%s:%d", $node['ip'], $node['port']);
+            $find = false;
+            foreach ($this->engines as $engine) {
+                if ($engine->host == $host) {
+                    $find = true;
                     break;
-                default:
-                    throw new \Exception('Invalid API version');
+                }
+            }
+            if (!$find) {
+                $this->addEngine($host);
             }
         }
+        // 减少
+        foreach ($this->engines as $key => $engine) {
+            $find = false;
+            foreach ($this->nodes->items() as $node) {
+                $host = sprintf("%s:%d", $node['ip'], $node['port']);
+                if ($engine->host == $host) {
+                    $find = true;
+                    break;
+                }
+            }
+            if (!$find) {
+                $this->engines[$key]->close();
+                unset($this->engines[$key]);
+            }
+        }
+
+        \React\EventLoop\Loop::addTimer(60, [$this, 'sync']);
     }
 
     /**
