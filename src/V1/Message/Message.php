@@ -3,8 +3,6 @@
 namespace Connmix\V1\Message;
 
 use Connmix\MessageInterface;
-use Connmix\ParamInterface;
-use Connmix\ResultInterface;
 use Ratchet\RFC6455\Messaging\MessageInterface as RatchetMessageInterface;
 
 class Message implements MessageInterface
@@ -42,8 +40,8 @@ class Message implements MessageInterface
      */
     public function type(): string
     {
-        if ($this->method() == 'queue.pop') {
-            return 'pop';
+        if ($this->event() !== '') {
+            return 'consume';
         }
 
         if (!is_null($this->error())) {
@@ -66,15 +64,19 @@ class Message implements MessageInterface
     }
 
     /**
+     * @return string
+     */
+    public function event(): string
+    {
+        return $this->storage['event'] ?? '';
+    }
+
+    /**
      * @return array|null
      */
     public function error(): ?array
     {
-        $error = $this->storage['error'] ?? null;
-        if ($error) {
-            return $error;
-        }
-        return $this->firstResult()->error();
+        return $this->storage['error'] ?? null;
     }
 
     /**
@@ -102,33 +104,15 @@ class Message implements MessageInterface
     }
 
     /**
-     * @return ParamInterface
-     */
-    public function firstParam(): ParamInterface
-    {
-        if (!isset($this->storage['params'][0])) {
-            return new Param();
-        }
-        return new Param($this->storage['params'][0]);
-    }
-
-    /**
-     * @return ResultInterface
-     */
-    public function firstResult(): ResultInterface
-    {
-        if (!isset($this->storage['result'][0])) {
-            return new Result();
-        }
-        return new Result($this->storage['result'][0]);
-    }
-
-    /**
      * @return int
      */
     public function clientID(): int
     {
-        return $this->firstParam()->clientID();
+        $result = $this->result();
+        if (!$result) {
+            return 0;
+        }
+        return $result['client_id'] ?? 0;
     }
 
     /**
@@ -136,7 +120,11 @@ class Message implements MessageInterface
      */
     public function queue(): string
     {
-        return $this->firstParam()->queue();
+        $result = $this->result();
+        if (!$result) {
+            return '';
+        }
+        return $result['queue'] ?? '';
     }
 
     /**
@@ -144,7 +132,11 @@ class Message implements MessageInterface
      */
     public function data(): ?array
     {
-        return $this->firstParam()->data();
+        $result = $this->result();
+        if (!$result) {
+            return [];
+        }
+        return $result['data'] ?? [];
     }
 
     /**
@@ -152,7 +144,11 @@ class Message implements MessageInterface
      */
     public function success(): bool
     {
-        return $this->firstResult()->success();
+        $result = $this->result();
+        if (!$result) {
+            return false;
+        }
+        return $result['success'] ?? false;
     }
 
     /**
@@ -160,7 +156,11 @@ class Message implements MessageInterface
      */
     public function fail(): int
     {
-        return $this->firstResult()->fail();
+        $result = $this->result();
+        if (!$result) {
+            return false;
+        }
+        return $result['fail'] ?? 0;
     }
 
     /**
@@ -168,7 +168,11 @@ class Message implements MessageInterface
      */
     public function total(): int
     {
-        return $this->firstResult()->total();
+        $result = $this->result();
+        if (!$result) {
+            return false;
+        }
+        return $result['total'] ?? 0;
     }
 
 }

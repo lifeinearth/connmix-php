@@ -19,10 +19,6 @@ interface MessageInterface
 
     public function id(): ?int;
 
-    public function firstParam(): ParamInterface;
-
-    public function firstResult(): ResultInterface;
-
     public function clientID(): int;
 
     public function queue(): string;

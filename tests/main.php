@@ -8,7 +8,7 @@ $client = \Connmix\ClientBuilder::create()
 $onFulfilled = function (\Connmix\Context $ctx) {
     $message = $ctx->message();
     switch ($message->type()) {
-        case "pop":
+        case "consume":
             $clientID = $message->clientID();
             $data = $message->data();
             $ctx->meshSend($clientID, sprintf("received: %s", $data['frame']['data'] ?? ''));
@@ -21,9 +21,8 @@ $onFulfilled = function (\Connmix\Context $ctx) {
         case "error":
             $error = $message->error();
             break;
-        case "unknown":
+        default:
             $payload = $message->rawMessage()->getPayload();
-            break;
     }
 };
 $onRejected = function (\Exception $e) {

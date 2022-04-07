@@ -43,9 +43,8 @@ $onFulfilled = function (\Connmix\Context $ctx) {
         case "error":
             $error = $message->error();
             break;
-        case "unknown":
+        default:
             $payload = $message->rawMessage()->getPayload();
-            break;
     }
 };
 $onRejected = function (\Exception $e) {
