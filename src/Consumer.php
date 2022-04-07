@@ -38,6 +38,11 @@ class Consumer
     protected $onRejected;
 
     /**
+     * @var int
+     */
+    protected $syncInterval = 60;
+
+    /**
      * @param Nodes $nodes
      * @param float $timeout
      * @param array $queues
@@ -47,7 +52,7 @@ class Consumer
         $this->nodes = $nodes;
         $this->timeout = $timeout;
         $this->queues = $queues;
-        \React\EventLoop\Loop::addTimer(60, [$this, 'sync']);
+        \React\EventLoop\Loop::addTimer($this->syncInterval, $this->syncFunc());
     }
 
     /**
@@ -84,45 +89,47 @@ class Consumer
      * @return void
      * @throws \Exception
      */
-    protected function sync(): void
+    protected function syncFunc(): \Closure
     {
-        try {
-            $this->nodes->loadNodes();
-        } catch (\Throwable $ex) {
-            echo sprintf("ERROR: load nodes fail: %s\n", $ex->getMessage());
-        }
+        return function () {
+            try {
+                $this->nodes->loadNodes();
+            } catch (\Throwable $ex) {
+                echo sprintf("ERROR: load nodes fail: %s\n", $ex->getMessage());
+            }
 
-        // 增加
-        foreach ($this->nodes->items() as $node) {
-            $host = sprintf("%s:%d", $node['ip'], $node['port']);
-            $find = false;
-            foreach ($this->engines as $engine) {
-                if ($engine->host == $host) {
-                    $find = true;
-                    break;
-                }
-            }
-            if (!$find) {
-                $this->addEngine($host);
-            }
-        }
-        // 减少
-        foreach ($this->engines as $key => $engine) {
-            $find = false;
+            // 增加
             foreach ($this->nodes->items() as $node) {
                 $host = sprintf("%s:%d", $node['ip'], $node['port']);
-                if ($engine->host == $host) {
-                    $find = true;
-                    break;
+                $find = false;
+                foreach ($this->engines as $engine) {
+                    if ($engine->host == $host) {
+                        $find = true;
+                        break;
+                    }
+                }
+                if (!$find) {
+                    $this->addEngine($host);
                 }
             }
-            if (!$find) {
-                $this->engines[$key]->close();
-                unset($this->engines[$key]);
+            // 减少
+            foreach ($this->engines as $key => $engine) {
+                $find = false;
+                foreach ($this->nodes->items() as $node) {
+                    $host = sprintf("%s:%d", $node['ip'], $node['port']);
+                    if ($engine->host == $host) {
+                        $find = true;
+                        break;
+                    }
+                }
+                if (!$find) {
+                    $this->engines[$key]->close();
+                    unset($this->engines[$key]);
+                }
             }
-        }
 
-        \React\EventLoop\Loop::addTimer(60, [$this, 'sync']);
+            \React\EventLoop\Loop::addTimer($this->syncInterval, $this->syncFunc());
+        };
     }
 
     /**
