@@ -125,6 +125,7 @@ class Consumer
                 if (!$find) {
                     $this->engines[$key]->close();
                     unset($this->engines[$key]);
+                    $this->engines = array_values($this->engines);
                 }
             }
 
