@@ -8,5 +8,7 @@ $client = \Connmix\ClientBuilder::create()
 $node = $client->node();
 $msg = $node->meshSend(1000, "test");
 var_dump($msg->error());
+$msg = $node->meshSend(1000, "test");
+var_dump($msg->error());
 $node->close();
 $client->close();

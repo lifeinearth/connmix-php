@@ -29,11 +29,6 @@ class Client
     protected $consumers = [];
 
     /**
-     * @var EngineV1
-     */
-    protected $engine;
-
-    /**
      * @param array $config
      */
     public function __construct(array $config)
@@ -82,6 +77,8 @@ class Client
         foreach ($this->consumers as $consumer) {
             $consumer->close();
         }
+
+        $this->nodes->close();
 
         $loop = \React\EventLoop\Loop::get();
         $loop->stop();

@@ -75,7 +75,7 @@ class Node
      */
     public function close(): void
     {
-        $this->client->close();
+        $this->client->close(1000, '');
     }
 
 }

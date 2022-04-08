@@ -3,6 +3,7 @@
 namespace Connmix;
 
 use Psr\Http\Message\ResponseInterface;
+use React\EventLoop\TimerInterface;
 
 class Nodes
 {
@@ -39,6 +40,11 @@ class Nodes
     protected $loadInterval = 60;
 
     /**
+     * @var TimerInterface
+     */
+    protected $timer;
+
+    /**
      * @param string $host
      * @param float $timeout
      * @throws \GuzzleHttp\Exception\GuzzleException
@@ -62,9 +68,9 @@ class Nodes
             } catch (\Throwable $ex) {
                 echo sprintf("ERROR: load nodes fail: %s\n", $ex->getMessage());
             }
-            \React\EventLoop\Loop::addTimer($this->loadInterval + mt_rand(1, 10), $func);
+            $this->timer = \React\EventLoop\Loop::addTimer($this->loadInterval + mt_rand(1, 10), $func);
         };
-        \React\EventLoop\Loop::addTimer($this->loadInterval + mt_rand(1, 10), $func);
+        $this->timer = \React\EventLoop\Loop::addTimer($this->loadInterval + mt_rand(1, 10), $func);
     }
 
     /**
@@ -116,6 +122,14 @@ class Nodes
     public function version(): string
     {
         return $this->version;
+    }
+
+    /**
+     * @return void
+     */
+    public function close(): void
+    {
+        $this->timer and \React\EventLoop\Loop::cancelTimer($this->timer);
     }
 
 }
