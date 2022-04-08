@@ -124,7 +124,7 @@ $onFulfilled = function (\Connmix\Context $ctx) {
 
 ```php
 $node = $client->random();
-$node->meshPublish("user_10001", '{"broadcast":"ok"}');
+$msg  = $node->meshPublish("user_10001", '{"broadcast":"ok"}');
 ```
 
 ## 发送到客户端
@@ -149,7 +149,7 @@ $onFulfilled = function (\Connmix\Context $ctx) {
 
 ```php
 $node = $client->random();
-$node->meshSend($clientID, '{"result":"ok"}');
+$msg  = $node->meshSend($clientID, '{"result":"ok"}');
 ```
 
 ## License
