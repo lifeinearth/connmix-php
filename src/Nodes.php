@@ -60,7 +60,16 @@ class Nodes
 
         $this->loadVersion();
         $this->loadNodes();
+    }
 
+    /**
+     * @return void
+     */
+    public function startSync(): void
+    {
+        if ($this->timer) {
+            return;
+        }
         $func = null;
         $func = function () use (&$func) {
             try {
@@ -77,7 +86,7 @@ class Nodes
      * @return void
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function loadVersion(): void
+    protected function loadVersion(): void
     {
         $url = sprintf("%s/version", $this->host);
         $response = $this->guzzle->request('GET', $url);
@@ -90,7 +99,7 @@ class Nodes
      * @return void
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function loadNodes(): void
+    protected function loadNodes(): void
     {
         $url = sprintf("%s/%s/nodes", $this->host, $this->version);
         $response = $this->guzzle->request('GET', $url);

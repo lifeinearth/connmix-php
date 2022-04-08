@@ -46,6 +46,7 @@ class Client
      */
     public function consume(string ...$queues): Consumer
     {
+        $this->nodes->startSync();
         $consumer = new Consumer($this->nodes, $this->timeout, $queues);
         $this->consumers[] = $consumer;
         return $consumer;
