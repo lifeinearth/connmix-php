@@ -74,8 +74,8 @@ class Engine
 
                 $conn->on('message', function (\Ratchet\RFC6455\Messaging\MessageInterface $msg) use ($conn, $onFulfilled, $onRejected) {
                     try {
-                        $receiveMessage = new Message($msg);
-                        $onFulfilled(new Context($conn, $receiveMessage, new Encoder()));
+                        $receiveMessage = new Message($msg->getPayload());
+                        $onFulfilled(new Context($conn, $receiveMessage));
                     } catch (\Throwable $e) {
                         $onRejected($e);
                     }
@@ -87,10 +87,7 @@ class Engine
                 });
 
                 try {
-                    $contents = $this->message->getContents();
-                    if ($contents != '') {
-                        $conn->send($contents);
-                    }
+                    $conn->send($this->message->getContents());
                 } catch (\Throwable $e) {
                     $onRejected($e);
                 }

@@ -2,6 +2,7 @@
 
 namespace Connmix;
 
+use Connmix\V1\Encoder;
 use Ratchet\Client\WebSocket;
 
 class Context
@@ -24,14 +25,13 @@ class Context
 
     /**
      * @param WebSocket $conn
-     * @param MessageInterface|null $message
-     * @param EncoderInterface $encoder
+     * @param MessageInterface $message
      */
-    public function __construct(WebSocket $conn, ?MessageInterface $message, EncoderInterface $encoder)
+    public function __construct(WebSocket $conn, MessageInterface $message)
     {
         $this->conn = $conn;
         $this->message = $message;
-        $this->encoder = $encoder;
+        $this->encoder = new Encoder();
     }
 
     /**
@@ -45,7 +45,7 @@ class Context
     /**
      * @param string $method
      * @param array $params
-     * @return void
+     * @return int
      */
     public function send(string $method, array $params = []): int
     {

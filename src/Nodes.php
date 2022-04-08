@@ -56,7 +56,7 @@ class Nodes
         $this->loadNodes();
 
         $func = null;
-        $func = function () use ($func) {
+        $func = function () use (&$func) {
             try {
                 $this->loadNodes();
             } catch (\Throwable $ex) {

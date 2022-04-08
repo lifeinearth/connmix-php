@@ -46,9 +46,13 @@ class Consumer
      * @param Nodes $nodes
      * @param float $timeout
      * @param array $queues
+     * @throws \Exception
      */
     public function __construct(Nodes $nodes, float $timeout, array $queues)
     {
+        if (empty($queues)) {
+            throw new \Exception('Consume queues cannot be empty');
+        }
         $this->nodes = $nodes;
         $this->timeout = $timeout;
         $this->queues = $queues;
@@ -72,6 +76,11 @@ class Consumer
         }
     }
 
+    /**
+     * @param string $host
+     * @return void
+     * @throws \Exception
+     */
     protected function addEngine(string $host)
     {
         switch ($this->nodes->version()) {
@@ -83,28 +92,6 @@ class Consumer
             default:
                 throw new \Exception('Invalid API version');
         }
-    }
-
-    /**
-     * @param string $version
-     * @param string $host
-     * @param float $timeout
-     * @return EngineV1
-     * @throws \Exception
-     */
-    public static function newEngine(string $version, string $host, float $timeout): EngineV1
-    {
-        switch ($version) {
-            case 'v1':
-                $engine = new EngineV1(function () {
-                }, function () {
-                }, [], $host, $timeout);
-                $engine->run();
-                break;
-            default:
-                throw new \Exception('Invalid API version');
-        }
-        return $engine;
     }
 
     /**

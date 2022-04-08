@@ -30,9 +30,6 @@ class ConsumeMessage
      */
     public function getContents(): string
     {
-        if (empty($this->queues)) {
-            return '';
-        }
         return sprintf($this->format, implode('","', $this->queues), AutoIncrement::id());
     }
 

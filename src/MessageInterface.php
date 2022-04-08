@@ -5,7 +5,7 @@ namespace Connmix;
 interface MessageInterface
 {
 
-    public function rawMessage(): \Ratchet\RFC6455\Messaging\MessageInterface;
+    public function rawMessage(): string;
 
     public function type(): string;
 

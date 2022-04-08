@@ -3,13 +3,12 @@
 namespace Connmix\V1\Message;
 
 use Connmix\MessageInterface;
-use Ratchet\RFC6455\Messaging\MessageInterface as RatchetMessageInterface;
 
 class Message implements MessageInterface
 {
 
     /**
-     * @var RatchetMessageInterface
+     * @var string
      */
     protected $raw;
 
@@ -19,18 +18,18 @@ class Message implements MessageInterface
     protected $storage;
 
     /**
-     * @param RatchetMessageInterface $message
+     * @param string $message
      */
-    public function __construct(RatchetMessageInterface $message)
+    public function __construct(string $message)
     {
         $this->raw = $message;
-        $this->storage = json_decode($message->getPayload(), true) ?: [];
+        $this->storage = json_decode($message, true) ?: [];
     }
 
     /**
-     * @return RatchetMessageInterface
+     * @return string
      */
-    public function rawMessage(): RatchetMessageInterface
+    public function rawMessage(): string
     {
         return $this->raw;
     }

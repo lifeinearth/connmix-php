@@ -2,8 +2,8 @@
 
 namespace Connmix;
 
-use Connmix\V1\Encoder;
 use Connmix\V1\Engine as EngineV1;
+use Connmix\V1\Node as NodeV1;
 
 class Client
 {
@@ -57,67 +57,21 @@ class Client
         return $consumer;
     }
 
-    protected function getConn(): \Ratchet\Client\WebSocket
-    {
-        // 寻找可用的ws连接
-        $connList = [];
-        foreach ($this->consumers as $consumer) {
-            foreach ($consumer->engines as $engine) {
-                if (!empty($engine->conn)) {
-                    $connList[] = $engine->conn;
-                }
-            }
-        }
-        // 没有找到就创建一个
-        if (empty($connList)) {
-            if (!isset($this->engine)) {
-                $nodes = $this->nodes->items();
-                $node = array_rand($nodes);
-                $host = sprintf("%s:%d", $node['ip'], $node['port']);
-                $this->engine = Consumer::newEngine($this->nodes->version(), $host, $this->timeout);
-            } else {
-                // 检查engine是否还在最新的nodes中
-                $find = false;
-                foreach ($this->nodes as $node) {
-                    $host = sprintf("%s:%d", $node['ip'], $node['port']);
-                    if ($this->engine->host == $host) {
-                        $find = true;
-                        break;
-                    }
-                }
-                if (!$find) {
-                    $this->engine->close();
-                    $this->engine = null;
-                    return $this->getConn();
-                }
-            }
-            $connList = [$this->engine->conn];
-        }
-        return $connList[array_rand($connList)];
-    }
-
     /**
-     * @param int $clientId
-     * @param string $data
-     * @return int
+     * @return NodeV1
+     * @throws \Exception
      */
-    public function meshSend(int $clientId, string $data): int
+    public function node(): NodeV1
     {
-        $conn = $this->getConn();
-        $ctx = new Context($conn, null, new Encoder());
-        return $ctx->meshSend($clientId, $data);
-    }
-
-    /**
-     * @param string $channel
-     * @param string $data
-     * @return int
-     */
-    public function meshPublish(string $channel, string $data): int
-    {
-        $conn = $this->getConn();
-        $ctx = new Context($conn, null, new Encoder());
-        return $ctx->meshPublish($channel, $data);
+        $nodes = $this->nodes->items();
+        $node = $nodes[array_rand($nodes)];
+        switch ($this->nodes->version()) {
+            case 'v1':
+                $url = sprintf("ws://%s:%d/ws/v1", $node['ip'], $node['port']);
+                return new NodeV1($url);
+            default:
+                throw new \Exception('Invalid API version');
+        }
     }
 
     /**
