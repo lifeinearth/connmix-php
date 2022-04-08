@@ -107,7 +107,7 @@ $onFulfilled = function (\Connmix\Context $ctx) {
 
 网格推送会在服务网格内自动寻址，可以在任何节点发起。
 
-- 接收消息的时候被动推送
+- 接收消息时被动推送
 
 ```php
 $onFulfilled = function (\Connmix\Context $ctx) {
@@ -131,7 +131,7 @@ $msg  = $node->meshPublish("user_10001", '{"broadcast":"ok"}');
 
 网格发送会在服务网格内自动寻址，可以在任何节点发起。
 
-- 接收消息的时候被动发送
+- 接收消息时被动发送
 
 ```php
 $onFulfilled = function (\Connmix\Context $ctx) {
