@@ -2,7 +2,6 @@
 
 namespace Connmix;
 
-use Connmix\V1\Engine as EngineV1;
 use Connmix\V1\Node as NodeV1;
 
 class Client
@@ -53,16 +52,34 @@ class Client
     }
 
     /**
-     * @return NodeV1
+     * @return NodeInterface
      * @throws \Exception
      */
-    public function node(): NodeV1
+    public function random(): NodeInterface
     {
         $nodes = $this->nodes->items();
         $node = $nodes[array_rand($nodes)];
         switch ($this->nodes->version()) {
             case 'v1':
                 $url = sprintf("ws://%s:%d/ws/v1", $node['ip'], $node['port']);
+                return new NodeV1($url);
+            default:
+                throw new \Exception('Invalid API version');
+        }
+    }
+
+    /**
+     * @param string $ip
+     * @param int $port
+     * @param string $version
+     * @return NodeInterface
+     * @throws \Exception
+     */
+    public function node(string $ip, int $port, string $version): NodeInterface
+    {
+        switch ($version) {
+            case 'v1':
+                $url = sprintf("ws://%s:%d/ws/v1", $ip, $port);
                 return new NodeV1($url);
             default:
                 throw new \Exception('Invalid API version');

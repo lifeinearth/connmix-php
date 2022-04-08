@@ -3,9 +3,11 @@
 namespace Connmix\V1;
 
 use Connmix\AutoIncrement;
+use Connmix\MessageInterface;
+use Connmix\NodeInterface;
 use Connmix\V1\Message\Message;
 
-class Node
+class Node implements NodeInterface
 {
 
     /**
@@ -30,11 +32,10 @@ class Node
     /**
      * @param string $method
      * @param array $params
-     * @return Message
+     * @return MessageInterface
      */
-    public function send(string $method, array $params = []): Message
+    public function send(string $method, array $params = []): MessageInterface
     {
-        $id = AutoIncrement::id();
         $message = $this->encoder->encode([
             'method' => $method,
             'params' => $params,
@@ -47,9 +48,9 @@ class Node
     /**
      * @param int $clientId
      * @param string $data
-     * @return Message
+     * @return MessageInterface
      */
-    public function meshSend(int $clientId, string $data): Message
+    public function meshSend(int $clientId, string $data): MessageInterface
     {
         return $this->send('mesh.send', [
             'client_id' => $clientId,
@@ -60,9 +61,9 @@ class Node
     /**
      * @param string $channel
      * @param string $data
-     * @return Message
+     * @return MessageInterface
      */
-    public function meshPublish(string $channel, string $data): Message
+    public function meshPublish(string $channel, string $data): MessageInterface
     {
         return $this->send('mesh.send', [
             'channel' => $channel,

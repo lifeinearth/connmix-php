@@ -75,7 +75,7 @@ class Engine
                 $conn->on('message', function (\Ratchet\RFC6455\Messaging\MessageInterface $msg) use ($conn, $onFulfilled, $onRejected) {
                     try {
                         $receiveMessage = new Message($msg->getPayload());
-                        $onFulfilled(new Context($conn, $receiveMessage));
+                        $onFulfilled(new Context($conn, $receiveMessage, new Encoder()));
                     } catch (\Throwable $e) {
                         $onRejected($e);
                     }
