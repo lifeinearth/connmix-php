@@ -79,24 +79,4 @@ class SyncSyncNode implements SyncNodeInterface
         $this->client->close(1000, '');
     }
 
-    public function message(): MessageInterface
-    {
-        throw new \Exception(sprintf("The '%s' method is not supported in synchronization mode", __METHOD__));
-    }
-
-    public function connCall(int $clientId, string $method, array $params): int
-    {
-        throw new \Exception(sprintf("The '%s' method is not supported in synchronization mode", __METHOD__));
-    }
-
-    public function setContextValue(int $clientId, string $key, $value): int
-    {
-        throw new \Exception(sprintf("The '%s' method is not supported in synchronization mode", __METHOD__));
-    }
-
-    public function subscribe(int $clientId, string ...$channels): int
-    {
-        throw new \Exception(sprintf("The '%s' method is not supported in synchronization mode", __METHOD__));
-    }
-
 }
