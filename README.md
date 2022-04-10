@@ -134,12 +134,12 @@ $message = $node->meshPublish("user_10001", '{"broadcast":"ok"}');
 - 接收消息时被动发送
 
 ```php
-$onFulfilled = function (\Connmix\Context $ctx) {
-    $message = $ctx->message();
+$onFulfilled = function (\Connmix\AsyncNodeInterface $node) {
+    $message = $node->message();
     switch ($message->type()) {
         case "consume":
             $clientID = $message->clientID();
-            $ctx->meshSend($clientID, '{"result":"ok"}');
+            $node->meshSend($clientID, '{"result":"ok"}');
             break;
     }
 };
