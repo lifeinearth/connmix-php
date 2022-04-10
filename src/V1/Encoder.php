@@ -2,9 +2,7 @@
 
 namespace Connmix\V1;
 
-use Connmix\EncoderInterface;
-
-class Encoder implements EncoderInterface
+class Encoder
 {
 
     /**

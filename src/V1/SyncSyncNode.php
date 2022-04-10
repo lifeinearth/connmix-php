@@ -4,10 +4,10 @@ namespace Connmix\V1;
 
 use Connmix\AutoIncrement;
 use Connmix\MessageInterface;
-use Connmix\NodeInterface;
+use Connmix\SyncNodeInterface;
 use Connmix\V1\Message\Message;
 
-class Node implements NodeInterface
+class SyncSyncNode implements SyncNodeInterface
 {
 
     /**
@@ -77,6 +77,26 @@ class Node implements NodeInterface
     public function close(): void
     {
         $this->client->close(1000, '');
+    }
+
+    public function message(): MessageInterface
+    {
+        throw new \Exception(sprintf("The '%s' method is not supported in synchronization mode", __METHOD__));
+    }
+
+    public function connCall(int $clientId, string $method, array $params): int
+    {
+        throw new \Exception(sprintf("The '%s' method is not supported in synchronization mode", __METHOD__));
+    }
+
+    public function setContextValue(int $clientId, string $key, $value): int
+    {
+        throw new \Exception(sprintf("The '%s' method is not supported in synchronization mode", __METHOD__));
+    }
+
+    public function subscribe(int $clientId, string ...$channels): int
+    {
+        throw new \Exception(sprintf("The '%s' method is not supported in synchronization mode", __METHOD__));
     }
 
 }

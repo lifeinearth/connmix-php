@@ -26,14 +26,14 @@ composer require connmix/connmix
 $client = \Connmix\ClientBuilder::create()
     ->setHost('127.0.0.1:6787')
     ->build();
-$onFulfilled = function (\Connmix\Context $ctx) {
-    $message = $ctx->message();
+$onFulfilled = function (\Connmix\AsyncNodeInterface $node) {
+    $message = $node->message();
     switch ($message->type()) {
         case "consume":
             $clientID = $message->clientID();
             $data = $message->data();
             // do something
-            $ctx->meshSend($clientID, sprintf("received: %s", $data['frame']['data'] ?? ''));
+            $node->meshSend($clientID, sprintf("received: %s", $data['frame']['data'] ?? ''));
             break;
         case "result":
             $success = $message->success();
@@ -44,10 +44,10 @@ $onFulfilled = function (\Connmix\Context $ctx) {
             $error = $message->error();
             break;
         default:
-            $payload = $message->rawMessage()->getPayload();
+            $payload = $message->rawMessage();
     }
 };
-$onRejected = function (\Exception $e) {
+$onRejected = function (\Throwable $e) {
     // handle error
 };
 $client->consume('foo')->then($onFulfilled, $onRejected);
@@ -68,8 +68,8 @@ end
 - 通过客户端执行 `set_context_value` 来完成鉴权。
 
 ```php
-$onFulfilled = function (\Connmix\Context $ctx) {
-    $message = $ctx->message();
+$onFulfilled = function (\Connmix\AsyncNodeInterface $node) {
+    $message = $node->message();
     switch ($message->type()) {
         case "consume":
             $clientID = $message->clientID();
@@ -80,7 +80,7 @@ $onFulfilled = function (\Connmix\Context $ctx) {
                 // 通过 $args 到数据库查询用户权限
                 // ...
                 
-                $ctx->setContextValue($clientID, 'user_id', 1000);
+                $node->setContextValue($clientID, 'user_id', 1000);
             }
             break;
     }
@@ -92,12 +92,12 @@ $onFulfilled = function (\Connmix\Context $ctx) {
 通过给某个连接订阅频道，我们可以给这些连接分组，比如：我有手机、电脑的2个连接，在通过授权验证后，我们可以都订阅 `user_10001` 频道，这样我们给该频道发送消息时就可以达到多个设备都可以收到消息的效果。
 
 ```php
-$onFulfilled = function (\Connmix\Context $ctx) {
-    $message = $ctx->message();
+$onFulfilled = function (\Connmix\AsyncNodeInterface $node) {
+    $message = $node->message();
     switch ($message->type()) {
         case "consume":
             $clientID = $message->clientID();
-            $ctx->subscribe($clientID, "user_10001");
+            $node->subscribe($clientID, "user_10001");
             break;
     }
 };
@@ -110,11 +110,11 @@ $onFulfilled = function (\Connmix\Context $ctx) {
 - 接收消息时被动推送
 
 ```php
-$onFulfilled = function (\Connmix\Context $ctx) {
-    $message = $ctx->message();
+$onFulfilled = function (\Connmix\AsyncNodeInterface $node) {
+    $message = $node->message();
     switch ($message->type()) {
         case "consume":
-            $ctx->meshPublish("user_10001", '{"broadcast":"ok"}');
+            $node->meshPublish("user_10001", '{"broadcast":"ok"}');
             break;
     }
 };

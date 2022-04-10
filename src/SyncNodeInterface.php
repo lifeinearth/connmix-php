@@ -2,7 +2,7 @@
 
 namespace Connmix;
 
-interface NodeInterface
+interface SyncNodeInterface
 {
 
     public function send(string $method, array $params = []): MessageInterface;

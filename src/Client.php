@@ -2,7 +2,7 @@
 
 namespace Connmix;
 
-use Connmix\V1\Node as NodeV1;
+use Connmix\V1\SyncSyncNode as NodeV1;
 
 class Client
 {
@@ -53,10 +53,10 @@ class Client
     }
 
     /**
-     * @return NodeInterface
+     * @return SyncNodeInterface
      * @throws \Exception
      */
-    public function random(): NodeInterface
+    public function random(): SyncNodeInterface
     {
         $nodes = $this->nodes->items();
         $node = $nodes[array_rand($nodes)];
@@ -73,10 +73,10 @@ class Client
      * @param string $ip
      * @param int $port
      * @param string $version
-     * @return NodeInterface
+     * @return SyncNodeInterface
      * @throws \Exception
      */
-    public function node(string $ip, int $port, string $version): NodeInterface
+    public function node(string $ip, int $port, string $version): SyncNodeInterface
     {
         switch ($version) {
             case 'v1':

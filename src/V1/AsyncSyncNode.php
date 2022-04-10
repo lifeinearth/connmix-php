@@ -1,10 +1,13 @@
 <?php
 
-namespace Connmix;
+namespace Connmix\V1;
 
+use Connmix\AutoIncrement;
+use Connmix\MessageInterface;
+use Connmix\AsyncNodeInterface;
 use Ratchet\Client\WebSocket;
 
-class Context
+class AsyncSyncNode implements AsyncNodeInterface
 {
 
     /**
@@ -18,7 +21,7 @@ class Context
     protected $message;
 
     /**
-     * @var EncoderInterface
+     * @var Encoder
      */
     protected $encoder;
 
@@ -26,7 +29,7 @@ class Context
      * @param WebSocket $conn
      * @param MessageInterface $message
      */
-    public function __construct(WebSocket $conn, MessageInterface $message, EncoderInterface $encoder)
+    public function __construct(WebSocket $conn, MessageInterface $message, Encoder $encoder)
     {
         $this->conn = $conn;
         $this->message = $message;
@@ -120,6 +123,14 @@ class Context
             'channel' => $channel,
             'data' => $data,
         ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function close(): void
+    {
+        $this->conn->close(1000, '');
     }
 
 }
