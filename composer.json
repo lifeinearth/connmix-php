@@ -1,5 +1,5 @@
 {
-  "name": "connmix/connmix",
+  "name": "connmix/connmixlf",
   "description": "PHP Client for CONNMIX",
   "type": "library",
   "keywords": [
